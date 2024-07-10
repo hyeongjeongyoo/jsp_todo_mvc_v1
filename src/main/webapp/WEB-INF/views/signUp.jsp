@@ -4,13 +4,35 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>회원가입</title>
+<link rel="stylesheet" type="text/css" href="../css/style.css">
 </head>
 <body>
+
+	<h2>회원가입</h2>
+	<!-- 에러 메세지 출력 -->
 	<%
-		String eMassage = (String)request.getAttribute("errorMessage");
-		out.println(eMassage);
+		// String errorMessage = (String)request.getAttribute("message");
+		String errorMessage = (String)request.getParameter("message");
+	if(errorMessage != null){
+		
 	%>
-	<h1>회원가입 JSP 파일입니다.</h1>
+		<p style="color: red"><%= errorMessage %></p>
+	<% 
+	}%>
+	
+	<form action="/mvc/user/signUp" method="post">
+		<label for="username">사용자 이름 : </label>
+		<input type="text" id="username" name="username" value="티모1">
+		
+		<label for="password">비밀번호 : </label>
+		<input type="password" id="password" name="password" value="1234">
+		
+		<label for="email">이메일 : </label>
+		<input type="text" id="email" name="email" value="abc@nate.com">
+		
+		<button type="submit">회원가입</button>
+	</form>	
+	
 </body>
 </html>

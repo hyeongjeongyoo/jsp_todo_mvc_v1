@@ -105,10 +105,11 @@ public class UserDAOImpl implements UserDAO{
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			// TODO - 삭제 예정
+			System.out.println("userDTO By Username : " + userDTO.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("userDTO By Username : " + userDTO);
 		return userDTO;
 	}
 
