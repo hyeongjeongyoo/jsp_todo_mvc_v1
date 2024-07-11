@@ -36,7 +36,7 @@ public class TodoDAOImpl  implements TodoDAO{
 				pstmt.setString(2, dto.getTitle());
 				pstmt.setString(3, dto.getDescription());
 				pstmt.setString(4, dto.getDueDate());
-				pstmt.setString(5, dto.getCompleted());
+				pstmt.setInt(5, dto.getCompleted() == "true" ? 1 : 0);
 				pstmt.executeUpdate();
 				
 				conn.commit();
@@ -53,25 +53,23 @@ public class TodoDAOImpl  implements TodoDAO{
 	@Override
 	public TodoDTO getTodoById(int id) {
 		
-		String sql = " SELECT * FROM todos WHERE id =? ";
+		String sql = " SELECT * FROM todos WHERE id = ? ";
 		TodoDTO todoDTO = null;
 		
 		try (Connection conn = dataSource.getConnection()){
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, id);
 			
-			try (PreparedStatement pstmt = conn.prepareStatement(sql)){
+			try (ResultSet rs = pstmt.executeQuery()){
 				
-				System.out.println("1111111111111111");
-				pstmt.setInt(1, id);
-				ResultSet rs = pstmt.executeQuery();
-				System.out.println("333333333333333");
 				if(rs.next()) {
 					todoDTO = new TodoDTO();
 					todoDTO.setId(rs.getInt("id"));
+					todoDTO.setUserId(rs.getInt("user_id"));
 					todoDTO.setTitle(rs.getString("title"));
 					todoDTO.setDescription(rs.getString("description"));
-					todoDTO.setDueDate(rs.getString("dueDate"));
+					todoDTO.setDueDate(rs.getString("due_date"));
 					todoDTO.setCompleted(rs.getString("completed"));
-					todoDTO.setUserId(rs.getInt("userId"));
 				}
 				
 			} catch (Exception e) {
@@ -82,7 +80,7 @@ public class TodoDAOImpl  implements TodoDAO{
 			e.printStackTrace();
 		}
 		
-		return null;
+		return todoDTO;
 	}
 
 	@Override
@@ -99,10 +97,16 @@ public class TodoDAOImpl  implements TodoDAO{
 				ResultSet rs = pstmt.executeQuery();
 				while(rs.next()) {
 					TodoDTO todoDTO = new TodoDTO();
+					
+//					String tempId = rs.getString("id");
+//					todoDTO.setId(Integer.parseInt(tempId));
+					
 					todoDTO.setId(rs.getInt("id"));
 					todoDTO.setTitle(rs.getString("title"));
 					todoDTO.setDescription(rs.getString("description"));
 					todoDTO.setDueDate(rs.getString("due_date"));
+//					int tempC = rs.getInt("completed");
+//					todoDTO.setCompleted(String.valueOf(tempC));
 					todoDTO.setCompleted(rs.getString("completed"));
 					todoDTO.setUserId(rs.getInt("user_id"));
 					list.add(todoDTO);
@@ -119,6 +123,9 @@ public class TodoDAOImpl  implements TodoDAO{
 		return list;
 	}
 
+	
+	// List 는 인터페이스, 프로젝트에 맞는 구현 클래스를 선택해서 활용할 수 있어서
+	
 	@Override
 	public List<TodoDTO> getAllTodos() {
 		
@@ -137,9 +144,9 @@ public class TodoDAOImpl  implements TodoDAO{
 					todoDTO.setId(rs.getInt("id"));
 					todoDTO.setTitle(rs.getString("title"));
 					todoDTO.setDescription(rs.getString("description"));
-					todoDTO.setDueDate(rs.getString("dueDate"));
+					todoDTO.setDueDate(rs.getString("due_date"));
 					todoDTO.setCompleted(rs.getString("completed"));
-					todoDTO.setUserId(rs.getInt("userId"));
+					todoDTO.setUserId(rs.getInt("user_id"));
 					
 					list.add(todoDTO);
 				}
@@ -160,14 +167,20 @@ public class TodoDAOImpl  implements TodoDAO{
 	public void updateTodo(TodoDTO dto, int principalId) {
 		
 		int rowCount = 0;
-		String sql = " UPDATE todos SET title = ?, getId = ? WHERE id = ? ";
+		String sql = " UPDATE todos SET title = ?, description = ?, "
+				+ " due_date = ?, completed = ? "
+				+ " WHERE id = ? and user_id = ? ";
 		
 		try (Connection conn = dataSource.getConnection()){
+			conn.setAutoCommit(false);
 			
 			try (PreparedStatement pstmt = conn.prepareStatement(sql)){
 				pstmt.setString(1, dto.getTitle());
-				pstmt.setInt(2, dto.getId());
-				pstmt.setInt(3, principalId);
+				pstmt.setString(2, dto.getDescription());
+				pstmt.setString(3, dto.getDueDate());
+				pstmt.setInt(4, dto.getCompleted() == "true" ? 1 : 0);
+				pstmt.setInt(5, dto.getId());
+				pstmt.setInt(6, dto.getUserId());
 				rowCount = pstmt.executeUpdate();
 				conn.commit();
 				
@@ -183,18 +196,27 @@ public class TodoDAOImpl  implements TodoDAO{
 		System.out.println("rowCount : " + rowCount);
 		
 	}
-
+	
+	
+/**
+ * 삭제 기능
+ * id : Todos Pk
+ * principalId : sesstion ID
+ */
 	@Override
 	public void deleteTodo(int id, int principalId) {
 		
-		String sql = " DELETE FROM todos WHERE id = ? ";
+		String sql = " DELETE FROM todos WHERE id = ? and user_id = ? ";
 		
 		try (Connection conn = dataSource.getConnection()){
+			
+			conn.setAutoCommit(false);
 			
 			try (PreparedStatement pstmt = conn.prepareStatement(sql)){
 				
 				pstmt.setInt(1, id);
 				pstmt.setInt(2, principalId);
+				pstmt.executeUpdate();
 				conn.commit();
 				
 			} catch (Exception e) {

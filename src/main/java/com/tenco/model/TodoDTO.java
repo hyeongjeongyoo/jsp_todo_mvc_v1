@@ -21,4 +21,9 @@ public class TodoDTO {
 	private String dueDate;
 	private String completed;
 
+	// completed 를 데이터 변환 메서드를 만들어 보자.
+	public String completedToString() {
+		return completed.equals("1") ? "true" : "false";
+	}
+	
 }

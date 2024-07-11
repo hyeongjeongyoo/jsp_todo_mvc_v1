@@ -13,8 +13,8 @@
 </head>
 <body>
 	<%
-		List<TodoDTO> todoList = (ArrayList)request.getAttribute("todoList");
-
+		List<TodoDTO> todoList = (List<TodoDTO>)request.getAttribute("list");
+		// out.print(todoList.toString());
 	
 		if(todoList != null && !todoList.isEmpty()){
 	%>
@@ -37,11 +37,11 @@
 			<td><%= todo.getTitle() %></td>
 			<td><%= todo.getDescription() %></td>
 			<td><%= todo.getDueDate() %></td>
-			<td><%= todo.getCompleted() %></td>
+			<td><%= todo.completedToString() == "true" ? "완료" : "미완료"%></td>
 			<td>
-				<a href="detail?id<%= todo.getId() %>">상세보기</a>
+				<a href="detail?id=<%= todo.getId() %>">상세보기</a>
 				
-				<form action="delete" >
+				<form action="delete" method="get">
 					<input type="hidden" id="id" name="id" value="<%= todo.getId() %>">
 					<button type="submit">삭제</button>
 				</form>
@@ -52,7 +52,6 @@
 	
 	<%} else { %>
 	
-	<hr>
 	<p>등록된 할 일이 없습니다.</p>
 
 	<%
